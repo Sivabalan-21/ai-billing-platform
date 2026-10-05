@@ -47,3 +47,14 @@ class SubscriptionOut(ORM):
     current_period_end: datetime
     trial_end: datetime | None
     canceled_at: datetime | None
+
+
+class InvoiceOut(ORM):
+    id: int
+    subscription_id: int
+    amount_cents: int
+    currency: str
+    status: str
+    due_date: datetime
+    paid_at: datetime | None
+    created_at: datetime | None
