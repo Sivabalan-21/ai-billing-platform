@@ -1,0 +1,69 @@
+from datetime import datetime
+from sqlalchemy import String, Integer, ForeignKey, DateTime, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.database import Base
+
+
+class Customer(Base):
+    __tablename__ = "customers"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    name: Mapped[str] = mapped_column(String(120))
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    subscriptions = relationship("Subscription", back_populates="customer")
+
+
+class Plan(Base):
+    __tablename__ = "plans"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(80))
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
+    interval: Mapped[str] = mapped_column(String(10), default="month")  # month | year
+    trial_days: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"))
+    plan_id: Mapped[int] = mapped_column(ForeignKey("plans.id"))
+    status: Mapped[str] = mapped_column(String(20), default="active")  # trialing | active | past_due | canceled
+    current_period_start: Mapped[datetime] = mapped_column(DateTime)
+    current_period_end: Mapped[datetime] = mapped_column(DateTime)
+    trial_end: Mapped[datetime | None] = mapped_column(DateTime)
+    canceled_at: Mapped[datetime | None] = mapped_column(DateTime)
+    last_active_at: Mapped[datetime | None] = mapped_column(DateTime)  # last time they used the service (churn signal)
+    customer = relationship("Customer", back_populates="subscriptions")
+    plan = relationship("Plan")
+    invoices = relationship("Invoice", back_populates="subscription")
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    subscription_id: Mapped[int] = mapped_column(ForeignKey("subscriptions.id"))
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
+    status: Mapped[str] = mapped_column(String(20), default="open")  # draft | open | paid | failed
+    due_date: Mapped[datetime] = mapped_column(DateTime)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    subscription = relationship("Subscription", back_populates="invoices")
+    payments = relationship("Payment", back_populates="invoice")
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    invoice_id: Mapped[int] = mapped_column(ForeignKey("invoices.id"))
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20))  # succeeded | failed
+    provider: Mapped[str] = mapped_column(String(20), default="stripe")
+    provider_ref: Mapped[str | None] = mapped_column(String(80))
+    failure_reason: Mapped[str | None] = mapped_column(String(120))
+    attempt_no: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    invoice = relationship("Invoice", back_populates="payments")

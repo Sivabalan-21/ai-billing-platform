@@ -1,6 +1,14 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from app.database import Base, engine
+from app import models  # noqa: F401  (registers the tables)
 
-app = FastAPI(title="AI Billing Platform")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="AI Billing Platform", lifespan=lifespan)
 
 @app.get("/health")
 def health():
