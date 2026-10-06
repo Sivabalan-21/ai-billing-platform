@@ -33,4 +33,7 @@ def pay(invoice_id: int, data: schemas.PayIn, db: Session = Depends(get_db)):
         raise HTTPException(404, "Invoice not found")
     if invoice.status == "paid":
         raise HTTPException(400, "Invoice already paid")
-    return pay_invoice(db, invoice, data.payment_method)
+    try:
+        return pay_invoice(db, invoice, data.payment_method, data.provider)
+    except ValueError as e:
+        raise HTTPException(400, str(e))

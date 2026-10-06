@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, UniqueConstraint, Text
 
 
 class Customer(Base):
@@ -122,3 +122,23 @@ class RevenueEntry(Base):
     currency = Column(String, nullable=False)
     period = Column(String, nullable=False)          # "2026-10"
     amount_cents = Column(Integer, nullable=False)
+
+class CreditApplication(Base):
+    __tablename__ = "credit_applications"
+
+    id = Column(Integer, primary_key=True)
+    plan_change_id = Column(Integer, ForeignKey("plan_changes.id"), unique=True, nullable=False)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=False)
+    amount_cents = Column(Integer, nullable=False)
+
+
+class EmailLog(Base):
+    __tablename__ = "email_logs"
+
+    id = Column(Integer, primary_key=True)
+    to_email = Column(String, nullable=False)
+    subject = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    status = Column(String, nullable=False)   # logged / sent / failed
+    error = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

@@ -73,3 +73,7 @@ class PaymentOut(ORM):
     failure_reason: str | None
     attempt_no: int
     created_at: datetime | None
+
+class PayIn(BaseModel):
+    payment_method: str = "pm_card_visa"
+    provider: str | None = None

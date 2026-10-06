@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.services.payments import pay_invoice
 from app.services.plan_changes import add_interval
+from app.services.emails import send_trial_reminder
 
 REMINDER_DAYS = 3
 
@@ -108,6 +109,7 @@ def run_trials(db: Session, payment_method: str, force: bool = False) -> list[di
         elif t.trial_end - now <= timedelta(days=REMINDER_DAYS) and not t.reminder_sent:
             t.reminder_sent = True  # Step 11 will send the actual email here
             db.commit()
+            send_trial_reminder(db, sub, t)
             report.append({
                 "subscription_id": sub.id, "result": "reminder_queued",
                 "days_left": (t.trial_end - now).days,
