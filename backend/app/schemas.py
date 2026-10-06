@@ -58,3 +58,18 @@ class InvoiceOut(ORM):
     due_date: datetime
     paid_at: datetime | None
     created_at: datetime | None
+
+class PayIn(BaseModel):
+    payment_method: str = "pm_card_visa"
+
+
+class PaymentOut(ORM):
+    id: int
+    invoice_id: int
+    amount_cents: int
+    status: str
+    provider: str
+    provider_ref: str | None
+    failure_reason: str | None
+    attempt_no: int
+    created_at: datetime | None
