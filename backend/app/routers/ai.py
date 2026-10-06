@@ -5,6 +5,7 @@ from app.database import get_db
 from app.services.churn import score_subscription
 from app.services.retention import send_offers
 from app.services.forecasts import predict_payment_failure, estimate_clv, failure_watchlist
+from app.services.pricing import pricing_suggestions, explain
 
 router = APIRouter(tags=["ai"])
 
@@ -57,3 +58,12 @@ def clv_one(subscription_id: int, db: Session = Depends(get_db)):
     if not sub:
         raise HTTPException(404, "Subscription not found")
     return estimate_clv(db, sub)
+
+@router.get("/ai/pricing-suggestions")
+def pricing(min_subs: int = 3, explain_with_ai: bool = True, db: Session = Depends(get_db)):
+    """min_subs: minimum customers per plan before we judge it (use 1 for test data)."""
+    result = pricing_suggestions(db, min_subs)
+    if explain_with_ai:
+        text, source = explain(result)
+        result["explanation"] = {"text": text, "source": source}
+    return result
