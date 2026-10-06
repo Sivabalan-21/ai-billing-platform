@@ -29,7 +29,10 @@ def plan_for(invoice: models.Invoice) -> dict | None:
     if attempts >= MAX_ATTEMPTS:
         return {"action": "give_up", "retry_at": None, "attempts": attempts}
 
-    retry_at = _naive(last.created_at) + timedelta(days=RETRY_DELAYS_DAYS[attempts - 1])
+    delay = RETRY_DELAYS_DAYS[attempts - 1]
+    if last.failure_reason == "insufficient_funds":
+        delay = max(delay, 3)    # give the customer time to top up the account
+    retry_at = _naive(last.created_at) + timedelta(days=delay)
     return {"action": "retry", "retry_at": retry_at, "attempts": attempts}
 
 
