@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.providers.registry import get_provider
 from app.services.billing import utcnow
+from app.services.revenue import recognize_invoice
 
 
 def pay_invoice(db: Session, invoice: models.Invoice, payment_method: str, provider_name: str = "stripe"):
@@ -30,7 +31,8 @@ def pay_invoice(db: Session, invoice: models.Invoice, payment_method: str, provi
     else:
         invoice.status = "failed"
         sub.status = "past_due"
-
     db.commit()
     db.refresh(payment)
+    if result.success:
+        recognize_invoice(db, invoice)
     return payment

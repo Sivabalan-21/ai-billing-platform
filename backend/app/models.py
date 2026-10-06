@@ -111,3 +111,14 @@ class Trial(Base):
     converted = Column(Boolean, default=False)
     reminder_sent = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+class RevenueEntry(Base):
+    __tablename__ = "revenue_entries"
+    __table_args__ = (UniqueConstraint("invoice_id", "period"),)
+
+    id = Column(Integer, primary_key=True)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=False)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    currency = Column(String, nullable=False)
+    period = Column(String, nullable=False)          # "2026-10"
+    amount_cents = Column(Integer, nullable=False)
