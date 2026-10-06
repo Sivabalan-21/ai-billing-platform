@@ -5,6 +5,7 @@ import SubscriptionDetail from "./pages/SubscriptionDetail";
 import Invoices from "./pages/Invoices";
 import Dunning from "./pages/Dunning";
 import DataPage from "./pages/DataPage";
+import Actions from "./pages/Actions";
 
 const link = ({ isActive }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium ${
@@ -26,6 +27,7 @@ export default function App() {
               <NavLink to="/revenue" className={link}>Revenue</NavLink>
               <NavLink to="/trials" className={link}>Trials</NavLink>
               <NavLink to="/emails" className={link}>Emails</NavLink>
+              <NavLink to="/actions" className={link}>Actions</NavLink>
             </nav>
           </div>
         </header>
