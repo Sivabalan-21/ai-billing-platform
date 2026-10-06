@@ -36,6 +36,11 @@ def retention_offers(min_risk: float = 0.7, dry_run: bool = True, db: Session = 
     """dry_run=true only previews the emails. Set dry_run=false to really send them."""
     return send_offers(db, min_risk, dry_run)
 
+@router.get("/ai/payment-risk")
+def payment_risk_watchlist(days_ahead: int = 7, min_risk: float = 0.3, db: Session = Depends(get_db)):
+    """Subscriptions renewing soon that are likely to be declined."""
+    return failure_watchlist(db, days_ahead, min_risk)
+
 @router.get("/ai/payment-risk/{subscription_id}")
 def payment_risk_one(subscription_id: int, db: Session = Depends(get_db)):
     sub = db.get(models.Subscription, subscription_id)
