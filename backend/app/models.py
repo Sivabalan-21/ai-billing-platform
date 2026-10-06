@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey,func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, UniqueConstraint
 
 
 class Customer(Base):
@@ -89,4 +89,25 @@ class PlanChange(Base):
     charge_cents = Column(Integer, nullable=False)    # cost of the new plan
     net_cents = Column(Integer, nullable=False)       # charge - credit (negative = customer credit)
     invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+class PlanPrice(Base):
+    __tablename__ = "plan_prices"
+    __table_args__ = (UniqueConstraint("plan_id", "currency"),)
+
+    id = Column(Integer, primary_key=True)
+    plan_id = Column(Integer, ForeignKey("plans.id"), nullable=False)
+    currency = Column(String, nullable=False)        # "usd", "eur", "inr"
+    amount_cents = Column(Integer, nullable=False)   # smallest unit (cents, paise)
+
+
+class Trial(Base):
+    __tablename__ = "trials"
+
+    id = Column(Integer, primary_key=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), unique=True, nullable=False)
+    trial_end = Column(DateTime, nullable=False)
+    currency = Column(String, nullable=False)
+    converted = Column(Boolean, default=False)
+    reminder_sent = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
