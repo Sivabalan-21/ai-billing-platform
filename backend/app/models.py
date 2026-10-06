@@ -142,3 +142,14 @@ class EmailLog(Base):
     status = Column(String, nullable=False)   # logged / sent / failed
     error = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
+
+class RetentionOffer(Base):
+    __tablename__ = "retention_offers"
+
+    id = Column(Integer, primary_key=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    risk_percent = Column(Integer, nullable=False)
+    discount_percent = Column(Integer, nullable=False)
+    subject = Column(String, nullable=False)
+    source = Column(String, nullable=False)   # "claude" or "template"
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))

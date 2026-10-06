@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     braintree_public_key: str = "bdtw6p4m5gycnfwc"
     braintree_private_key: str = "4f027b8c22ded9877632e198ff642e72"
     braintree_merchant_account_id: str = "student"   # optional: needed for non-USD later
+    anthropic_api_key: str = "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"
+    anthropic_model: str = "claude-haiku-4-5-20251001"
 
 
 settings = Settings()
