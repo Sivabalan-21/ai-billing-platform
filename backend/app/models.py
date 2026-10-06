@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, UniqueConstraint, Text
+from sqlalchemy import (
+    Column, Integer, String, DateTime, ForeignKey, Boolean,
+    UniqueConstraint, Text, func,
+)
 
 
 class Customer(Base):
