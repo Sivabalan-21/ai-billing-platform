@@ -4,6 +4,7 @@ import Subscriptions from "./pages/Subscriptions";
 import SubscriptionDetail from "./pages/SubscriptionDetail";
 import Invoices from "./pages/Invoices";
 import Dunning from "./pages/Dunning";
+import DataPage from "./pages/DataPage";
 
 const link = ({ isActive }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium ${
@@ -22,6 +23,9 @@ export default function App() {
               <NavLink to="/subscriptions" className={link}>Subscriptions</NavLink>
               <NavLink to="/invoices" className={link}>Invoices</NavLink>
               <NavLink to="/dunning" className={link}>Dunning</NavLink>
+              <NavLink to="/revenue" className={link}>Revenue</NavLink>
+              <NavLink to="/trials" className={link}>Trials</NavLink>
+              <NavLink to="/emails" className={link}>Emails</NavLink>
             </nav>
           </div>
         </header>
@@ -32,6 +36,9 @@ export default function App() {
             <Route path="/subscriptions/:id" element={<SubscriptionDetail />} />
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/dunning" element={<Dunning />} />
+            <Route path="/revenue" element={<DataPage title="Revenue report" path="/revenue/report" />} />
+            <Route path="/trials" element={<DataPage title="Trials" path="/trials" />} />
+            <Route path="/emails" element={<DataPage title="Emails sent" path="/emails" />} />
           </Routes>
         </main>
       </div>
