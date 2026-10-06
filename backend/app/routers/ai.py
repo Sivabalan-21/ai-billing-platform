@@ -72,3 +72,43 @@ def pricing(min_subs: int = 3, explain_with_ai: bool = True, db: Session = Depen
         text, source = explain(result)
         result["explanation"] = {"text": text, "source": source}
     return result
+
+@router.get("/subscriptions")
+def list_subscriptions(db: Session = Depends(get_db)):
+    plans = {p.id: p for p in db.query(models.Plan).all()}
+    rows = []
+    for s in db.query(models.Subscription).order_by(models.Subscription.id).all():
+        p = plans.get(s.plan_id)
+        rows.append({
+            "id": s.id,
+            "customer_id": getattr(s, "customer_id", None),
+            "plan_id": s.plan_id,
+            "plan_name": getattr(p, "name", f"Plan {s.plan_id}") if p else None,
+            "status": s.status,
+            "current_period_end": getattr(s, "current_period_end", None),
+        })
+    return rows
+
+
+@router.get("/subscriptions/{subscription_id}/overview")
+def subscription_overview(subscription_id: int, db: Session = Depends(get_db)):
+    sub = db.get(models.Subscription, subscription_id)
+    if not sub:
+        raise HTTPException(404, "Subscription not found")
+
+    def safe(fn):
+        try:
+            return fn(db, sub)
+        except Exception as e:
+            return {"error": str(e)}
+
+    return {
+        "id": sub.id,
+        "customer_id": getattr(sub, "customer_id", None),
+        "plan_id": sub.plan_id,
+        "status": sub.status,
+        "current_period_end": getattr(sub, "current_period_end", None),
+        "churn": safe(score_subscription),
+        "payment_risk": safe(predict_payment_failure),
+        "clv": safe(estimate_clv),
+    }   

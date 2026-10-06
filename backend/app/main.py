@@ -1,5 +1,8 @@
+import truststore
+truststore.inject_into_ssl()
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import Base, engine, SessionLocal
 from app import models  # noqa: F401
@@ -29,6 +32,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="AI Billing Platform", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(billing.router)
 app.include_router(invoices.router)
 app.include_router(dunning.router)
@@ -49,6 +60,7 @@ def _start_scheduler():
 @app.on_event("shutdown")
 def _stop_scheduler():
     stop_scheduler()
+
 
 @app.get("/health")
 def health():
