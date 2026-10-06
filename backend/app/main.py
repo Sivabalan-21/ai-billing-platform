@@ -10,6 +10,7 @@ from app.routers import billing, invoices, dunning, usage, plan_changes, trials,
 from app.services.billing import utcnow
 from app.services.invoicing import generate_due_invoices
 from app.scheduler import start_scheduler, stop_scheduler
+from app.config import settings
 
 scheduler = BackgroundScheduler()
 
@@ -35,7 +36,7 @@ app = FastAPI(title="AI Billing Platform", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",")],
     allow_methods=["*"],
     allow_headers=["*"],
 )
