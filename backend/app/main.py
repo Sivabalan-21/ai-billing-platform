@@ -65,3 +65,13 @@ def _stop_scheduler():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    if settings.scheduler_enabled:
+        scheduler.add_job(billing_job, "interval", minutes=60, id="billing", replace_existing=True)
+        scheduler.start()
+    yield
+    if scheduler.running:
+        scheduler.shutdown()

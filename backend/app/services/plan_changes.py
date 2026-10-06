@@ -32,6 +32,7 @@ def calculate_change(db: Session, sub: models.Subscription, new_plan_id: int) ->
     total = (end - start).total_seconds()
     remaining = max((end - now).total_seconds(), 0)
     fraction = remaining / total if total > 0 else 0
+    fraction = max(0.0, min(1.0, fraction))
 
     credit = round(old.amount_cents * fraction)
     if old.interval != new.interval:

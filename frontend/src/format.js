@@ -13,3 +13,9 @@ export function sumByCurrency(rows, key) {
   }
   return totals;
 }
+
+export function fmtDate(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  return isNaN(d) ? "-" : d.toLocaleDateString();
+}
