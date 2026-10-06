@@ -1,7 +1,7 @@
-from datetime import datetime
-from sqlalchemy import String, Integer, ForeignKey, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
+from datetime import datetime, timezone
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey,func
 
 
 class Customer(Base):
@@ -67,3 +67,13 @@ class Payment(Base):
     attempt_no: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     invoice = relationship("Invoice", back_populates="payments")
+
+class UsageEvent(Base):
+    __tablename__ = "usage_events"
+
+    id = Column(Integer, primary_key=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    event_key = Column(String, unique=True, nullable=True)  # stops double-counting retries
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)  # set once billed
+    recorded_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)) 

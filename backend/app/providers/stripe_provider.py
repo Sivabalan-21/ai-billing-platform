@@ -27,5 +27,5 @@ class StripeProvider(PaymentProvider):
                 return PaymentResult(True, provider_ref=intent.id)
             return PaymentResult(False, provider_ref=intent.id, failure_reason=intent.status)
         except Exception as e:
-            reason = getattr(e, "code", None) or str(e)
+            reason = getattr(e, "decline_code", None) or getattr(e, "code", None) or str(e)
             return PaymentResult(False, failure_reason=str(reason)[:120])
