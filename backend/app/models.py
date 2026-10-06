@@ -77,3 +77,16 @@ class UsageEvent(Base):
     event_key = Column(String, unique=True, nullable=True)  # stops double-counting retries
     invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)  # set once billed
     recorded_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)) 
+
+class PlanChange(Base):
+    __tablename__ = "plan_changes"
+
+    id = Column(Integer, primary_key=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    from_plan_id = Column(Integer, nullable=False)
+    to_plan_id = Column(Integer, nullable=False)
+    credit_cents = Column(Integer, nullable=False)    # unused value of the old plan
+    charge_cents = Column(Integer, nullable=False)    # cost of the new plan
+    net_cents = Column(Integer, nullable=False)       # charge - credit (negative = customer credit)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
