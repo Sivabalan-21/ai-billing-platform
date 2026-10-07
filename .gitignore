@@ -4,3 +4,14 @@ backend/.env
 *.db
 venv/
 node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+backend/.env
+*.db
+node_modules/
