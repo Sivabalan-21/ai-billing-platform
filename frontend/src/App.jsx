@@ -6,6 +6,7 @@ import Invoices from "./pages/Invoices";
 import Dunning from "./pages/Dunning";
 import DataPage from "./pages/DataPage";
 import Actions from "./pages/Actions";
+import ChangePlan from "./pages/ChangePlan";
 
 const link = ({ isActive }) =>
   `rounded-lg px-3 py-1.5 text-sm font-medium ${
@@ -33,6 +34,7 @@ export default function App() {
               <NavLink to="/trials" className={link}>Trials</NavLink>
               <NavLink to="/emails" className={link}>Emails</NavLink>
               <NavLink to="/actions" className={link}>Actions</NavLink>
+              <NavLink to="/change-plan" className={link}>Change plan</NavLink>
             </nav>
             <button
               onClick={signOut}
@@ -51,6 +53,8 @@ export default function App() {
             <Route path="/dunning" element={<Dunning />} />
             <Route path="/revenue" element={<DataPage title="Revenue report" path="/revenue/report" />} />
             <Route path="/trials" element={<DataPage title="Trials" path="/trials" />} />
+            <Route path="/actions" element={<Actions />} />
+            <Route path="/change-plan" element={<ChangePlan />} />
             <Route path="/emails" element={<DataPage title="Emails sent" path="/emails" />} />
           </Routes>
         </main>
