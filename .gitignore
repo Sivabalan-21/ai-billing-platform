@@ -1,1 +1,6 @@
 billing.db
+.env
+backend/.env
+*.db
+venv/
+node_modules/
