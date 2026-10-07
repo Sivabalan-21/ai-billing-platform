@@ -1,0 +1,21 @@
+name: Daily billing job
+
+on:
+  schedule:
+    - cron: "30 2 * * *"   # every day at 02:30 UTC (08:00 in India)
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+jobs:
+  run-daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Call the daily job
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --max-time 240 --retry 3 --retry-delay 30 --retry-all-errors \
+            -X POST "$API_URL/jobs/run-daily" \
+            -H "X-Admin-Key: $ADMIN_API_KEY"
