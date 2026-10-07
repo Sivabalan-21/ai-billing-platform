@@ -12,6 +12,11 @@ const link = ({ isActive }) =>
     isActive ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-100"
   }`;
 
+function signOut() {
+  sessionStorage.removeItem("adminKey");
+  window.dispatchEvent(new Event("auth-required"));
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -29,6 +34,12 @@ export default function App() {
               <NavLink to="/emails" className={link}>Emails</NavLink>
               <NavLink to="/actions" className={link}>Actions</NavLink>
             </nav>
+            <button
+              onClick={signOut}
+              className="ml-auto text-sm text-gray-500 hover:text-gray-800"
+            >
+              Sign out
+            </button>
           </div>
         </header>
         <main className="mx-auto max-w-6xl p-8">

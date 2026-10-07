@@ -11,6 +11,8 @@ from app.services.billing import utcnow
 from app.services.invoicing import generate_due_invoices
 from app.scheduler import start_scheduler, stop_scheduler
 from app.config import settings
+from fastapi import Depends
+from app.auth import require_admin
 
 scheduler = BackgroundScheduler()
 
@@ -32,7 +34,7 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
 
 
-app = FastAPI(title="AI Billing Platform", lifespan=lifespan)
+app = FastAPI(title="AI Billing Platform", dependencies=[Depends(require_admin)])
 
 app.add_middleware(
     CORSMiddleware,
