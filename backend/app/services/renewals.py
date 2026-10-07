@@ -58,7 +58,7 @@ def renew_due(db: Session, payment_method: str, subscription_id: int | None = No
             sub.current_period_end = add_interval(start, plan.interval)
 
             invoice = models.Invoice(subscription_id=sub.id, amount_cents=remaining,
-                                     currency=currency, status="open")
+                                     currency=currency, status="open", due_date=start)
             db.add(invoice)
             db.flush()
             for pc in used:

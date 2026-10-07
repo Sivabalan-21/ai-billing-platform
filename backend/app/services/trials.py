@@ -69,7 +69,7 @@ def convert_trial(db: Session, trial: models.Trial, payment_method: str):
     sub.current_period_end = add_interval(start, plan.interval)
     invoice = models.Invoice(
         subscription_id=sub.id, amount_cents=amount,
-        currency=trial.currency, status="open",
+        currency=trial.currency, status="open", due_date=start,
     )
     db.add(invoice)
     trial.converted = True

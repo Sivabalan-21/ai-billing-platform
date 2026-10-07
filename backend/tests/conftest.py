@@ -96,3 +96,19 @@ class Factory:
 @pytest.fixture
 def make(db):
     return Factory(db)
+
+
+@pytest.fixture
+def fake_pay():
+    """Stand-in for pay_invoice so tests never touch a payment provider."""
+    from types import SimpleNamespace
+
+    def build(status="succeeded", attempt_no=1, reason=None):
+        def pay(db, invoice, payment_method):
+            pay.calls.append(invoice.id)
+            return SimpleNamespace(status=status, attempt_no=attempt_no, failure_reason=reason)
+
+        pay.calls = []
+        return pay
+
+    return build
