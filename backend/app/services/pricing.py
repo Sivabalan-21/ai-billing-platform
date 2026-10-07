@@ -132,4 +132,4 @@ def explain(result: dict) -> tuple[str, str]:
                 return text, "claude"
         except Exception:
             pass  # fall back to the template
-    return _template_explanation(result["plans"]),
+    return _template_explanation(result["plans"]), "template"
