@@ -61,6 +61,7 @@ def apply_change(db: Session, sub: models.Subscription, new_plan_id: int):
             amount_cents=c["net_cents"],
             currency=c["currency"],
             status="open",
+            due_date=_naive(datetime.utcnow()),
         )
         db.add(invoice)
         db.flush()

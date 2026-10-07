@@ -1,0 +1,53 @@
+"""Suspected bugs, written as expected failures.
+
+While the behaviour exists these stay green (xfail). When you fix the code, the
+test XPASSes, which pytest reports as a failure (strict). Then delete the marker.
+"""
+from datetime import datetime, timedelta
+
+import pytest
+
+from app import models
+from app.services import dunning, payments
+from helpers import FakeProvider
+
+NOW = datetime(2026, 3, 10, 12, 0)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="pay_invoice sets the subscription to past_due on any failed charge, even if canceled",
+)
+def test_failed_payment_does_not_revive_a_canceled_subscription(db, make, monkeypatch):
+    monkeypatch.setattr(payments, "get_provider", lambda name: FakeProvider(success=False, reason="generic_decline"))
+    monkeypatch.setattr(payments, "recognize_invoice", lambda db, inv: None)
+    monkeypatch.setattr(payments, "notify_payment", lambda db, inv, pay: None)
+    sub = make.sub(make.plan(), status="canceled")
+    inv = make.invoice(sub, status="open")
+
+    payments.pay_invoice(db, inv, "pm_card_visa")
+
+    assert sub.status == "canceled"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="run_dunning retries failed invoices without checking the subscription status",
+)
+def test_dunning_does_not_charge_a_canceled_subscription(db, make, fake_pay, monkeypatch):
+    monkeypatch.setattr(dunning, "utcnow", lambda: NOW)
+    pay = fake_pay("succeeded", attempt_no=2)
+    monkeypatch.setattr(dunning, "pay_invoice", pay)
+
+    sub = make.sub(make.plan(), status="canceled")
+    inv = make.invoice(sub, status="failed")
+    db.add(models.Payment(
+        invoice_id=inv.id, amount_cents=inv.amount_cents, status="failed",
+        failure_reason="generic_decline", attempt_no=1,
+        created_at=NOW - timedelta(days=2),
+    ))
+    db.commit()
+
+    dunning.run_dunning(db, "pm_card_visa")
+
+    assert pay.calls == []
