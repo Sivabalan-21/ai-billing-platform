@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from app.database import get_db
 from app import models, schemas
-from app.services.billing import utcnow, period_end, plan_change_amount
+from app.services.billing import utcnow, period_end
 
 router = APIRouter()
 
@@ -58,50 +58,6 @@ def create_subscription(data: schemas.SubscriptionIn, db: Session = Depends(get_
     db.commit()
     db.refresh(sub)
     return sub
-
-
-@router.post("/subscriptions/{sub_id}/change-plan")
-def change_plan(sub_id: int, data: schemas.ChangePlanIn, db: Session = Depends(get_db)):
-    sub = db.get(models.Subscription, sub_id)
-    new_plan = db.get(models.Plan, data.new_plan_id)
-    if not sub or not new_plan:
-        raise HTTPException(404, "Subscription or plan not found")
-    if sub.status != "active":
-        raise HTTPException(400, "Only active subscriptions can change plan")
-    if new_plan.id == sub.plan_id:
-        raise HTTPException(400, "Already on this plan")
-    if new_plan.currency != sub.plan.currency:
-        raise HTTPException(400, "Cannot switch between currencies")
-
-    now = utcnow()
-    net, new_period = plan_change_amount(sub, sub.plan, new_plan, now)
-
-    sub.plan_id = new_plan.id
-    if new_period:
-        sub.current_period_start = now
-        sub.current_period_end = period_end(now, new_plan.interval)
-
-    invoice_id = None
-    if net > 0:
-        invoice = models.Invoice(
-            subscription_id=sub.id,
-            amount_cents=net,
-            currency=new_plan.currency,
-            status="open",
-            due_date=now,
-        )
-        db.add(invoice)
-        db.flush()
-        invoice_id = invoice.id
-
-    db.commit()
-    return {
-        "subscription_id": sub.id,
-        "new_plan": new_plan.name,
-        "amount_due_cents": max(net, 0),
-        "credit_cents": max(-net, 0),
-        "invoice_id": invoice_id,
-    }
 
 
 @router.post("/subscriptions/{sub_id}/cancel", response_model=schemas.SubscriptionOut)
