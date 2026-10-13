@@ -4,7 +4,7 @@ import { api } from "../api";
 import { money, fmtDate } from "../format";
 import { Badge, Section, Stat, Table, Loading, LEVEL_STYLE, STATUS_STYLE } from "../ui";
 import { post } from "../actions";
-import ChangePlan from "../ChangePlan";
+import ChangePlan from "./ChangePlan";
 
 export default function SubscriptionDetail() {
   const { id } = useParams();
